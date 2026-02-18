@@ -1,0 +1,11 @@
+- name: install apache
+  hosts: openstack
+  become: yes
+  tasks:
+    - name: update apt-get
+      ansible.builtin.apt:
+        update_cache: yes
+    - name: appache install
+      ansible.builtin.apt:  
+        name:  apache2
+        state: latest
