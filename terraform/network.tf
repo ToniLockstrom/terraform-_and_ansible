@@ -9,6 +9,7 @@ resource "openstack_networking_subnet_v2" "subnet" {
   network_id		= openstack_networking_network_v2.network.id
   cidr			= "192.168.199.0/24"
   ip_version		= 4
+  dns_nameservers	= ["1.1.1.1", "8.8.8.8"]
 }
 #Create security groups and firewall rules
 resource "openstack_networking_secgroup_v2" "secgroup_bastion" {
