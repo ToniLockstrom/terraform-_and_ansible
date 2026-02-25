@@ -3,7 +3,7 @@ resource "openstack_networking_network_v2" "network" {
   name			= "the_network"
   admin_state_up	= "true"
 }
-#Create Subnet
+#Create Subnet, and set DNS resolver
 resource "openstack_networking_subnet_v2" "subnet" {
   name			= "the_subnet"
   network_id		= openstack_networking_network_v2.network.id
@@ -11,11 +11,13 @@ resource "openstack_networking_subnet_v2" "subnet" {
   ip_version		= 4
   dns_nameservers	= ["1.1.1.1", "8.8.8.8"]
 }
-#Create security groups and firewall rules
+#Create security group, bastion
 resource "openstack_networking_secgroup_v2" "secgroup_bastion" {
   name			= "bastion_sg"
   description		= "allow SSH"
 }
+#Create firewall rules, bastion
+#allow ssh from any IP
 resource "openstack_networking_secgroup_rule_v2" "bastion_ssh" {
   direction		= "ingress"
   protocol		= "tcp"
@@ -25,10 +27,13 @@ resource "openstack_networking_secgroup_rule_v2" "bastion_ssh" {
   remote_ip_prefix	= "0.0.0.0/0"
   security_group_id	= openstack_networking_secgroup_v2.secgroup_bastion.id
 }
+#create security group, nextcloud
 resource "openstack_networking_secgroup_v2" "secgroup_nextcloud" {
   name                  = "nextcloud_sg"
   description           = "allow SSH only from bastion"
 }
+#Create firewall rules, nextcloud
+#allow SSH to nextcloud server only from bastion
 resource "openstack_networking_secgroup_rule_v2" "ssh_from_bastion" {
   direction             = "ingress"
   protocol              = "tcp"
@@ -38,6 +43,7 @@ resource "openstack_networking_secgroup_rule_v2" "ssh_from_bastion" {
   remote_group_id       = openstack_networking_secgroup_v2.secgroup_bastion.id
   security_group_id     = openstack_networking_secgroup_v2.secgroup_nextcloud.id
 }
+#allow HTTP traffic 
 resource "openstack_networking_secgroup_rule_v2" "http_nextcloud" {
   direction         = "ingress"
   protocol          = "tcp"
